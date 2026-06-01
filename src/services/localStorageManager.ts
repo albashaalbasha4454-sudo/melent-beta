@@ -32,6 +32,11 @@ export const MELENT_KEYS = {
   PATIENT_QUICK_NOTES: 'melent_patient_quick_notes',
   LAST_BACKUP: 'melent_last_backup_date',
   AUDIT_LOG: 'melent_audit_log',
+  // B2B Keys
+  B2B_COMPANIES: 'melent_b2b_companies',
+  B2B_DEALS: 'melent_b2b_deals',
+  B2B_FOLLOWUPS: 'melent_b2b_followups',
+  B2B_PRODUCTS: 'melent_b2b_products',
 };
 
 // Simplified security helper

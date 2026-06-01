@@ -308,7 +308,114 @@ export interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-export type View = 'dashboard' | 'clients' | 'inventory' | 'orders' | 'expenses' | 'reports';
+export type View = 'dashboard' | 'clients' | 'inventory' | 'orders' | 'expenses' | 'reports' | 'b2b';
+
+// --- B2B Business Development & Deal Management Types ---
+
+export type B2BLanguage = 'Arabic' | 'English' | 'Turkish';
+export type B2BCompanyType = 'Distributor' | 'Hospital' | 'Pharmacy' | 'Clinic' | 'Government' | 'Other';
+export type B2BInterestCategory = 
+  | 'Dermocosmetics' 
+  | 'Cosmetics' 
+  | 'Supplements' 
+  | 'Medical Devices' 
+  | 'Laboratory' 
+  | 'Consumables' 
+  | 'Medical Aesthetic Devices'
+  | 'Medical & Healthcare Devices'
+  | 'Disposable Medical Products'
+  | 'General Medical Supplies'
+  | 'Industrial & Skincare Cooperation'
+  | 'Private Label Products'
+  | 'Nutraceuticals'
+  | 'Supplements & Nutrition';
+export type B2BExpectedDemand = 'Small' | 'Medium' | 'Large';
+export type B2BSource = 'LinkedIn' | 'Email' | 'Exhibition' | 'Referral' | 'Other';
+
+export interface B2BCompany {
+  id: string; // Company Code
+  name: string;
+  country: string;
+  city?: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  source: B2BSource;
+  language: B2BLanguage;
+  qualification: {
+    type: B2BCompanyType;
+    interestedCategories: B2BInterestCategory[];
+    targetProducts: string;
+    expectedDemand: B2BExpectedDemand;
+  };
+  isPublicLead?: boolean;
+  createdAt: string;
+}
+
+export type B2BDealStage = 'New Lead' | 'Qualified' | 'Opportunity' | 'Proposal Sent' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
+export type B2BMarketPositioning = 'Premium' | 'Mid-range';
+export type B2BPriority = 'High' | 'Medium' | 'Low';
+
+export interface B2BProductB2B {
+  id: string; // Product Code
+  name: string;
+  type: string;
+  category: B2BInterestCategory;
+  marketPositioning: B2BMarketPositioning;
+}
+
+export type B2BPaymentTermsType = 'Advance Payment 100%' | '50% Advance + 50% on Delivery' | 'LC' | 'Promissory Note / Bank Guarantee' | 'Custom';
+
+export interface B2BDeal {
+  id: string; // Deal Code: MC-DEAL-COUNTRY-001
+  companyId: string;
+  companyName: string;
+  productId?: string;
+  productName?: string;
+  priority: B2BPriority;
+  stage: B2BDealStage;
+  quotation: {
+    sent: boolean;
+    date?: string;
+    valueUSD?: number;
+    filePath?: string;
+  };
+  commercial: {
+    paymentTerms: B2BPaymentTermsType;
+    paymentDetails: string;
+    paymentApproved: boolean;
+  };
+  documents: {
+    quotationFile?: string;
+    agreementFile?: string;
+    supplierOfferFile?: string;
+    clientRFQFile?: string;
+    relatedDocs: string[];
+  };
+  closure?: {
+    isClosed: boolean;
+    outcome?: 'Won' | 'Lost';
+    reason?: string;
+    closedAt?: string;
+    notes?: string;
+  };
+  createdAt: string;
+}
+
+export type B2BCommunicationType = 'Call' | 'WhatsApp' | 'Email' | 'Meeting';
+
+export interface B2BFollowUp {
+  id: string; // Auto increment or key
+  dealId: string;
+  companyName: string;
+  contactPerson: string;
+  date: string;
+  communicationType: B2BCommunicationType;
+  interestLevel: 'High' | 'Medium' | 'Low';
+  notes: string;
+  nextStep: 'Send quotation' | 'Follow-up call' | 'Meeting' | 'Send samples' | 'Waiting response' | 'Other';
+  nextFollowUpDate: string;
+}
 
 // --- System Management & Security ---
 

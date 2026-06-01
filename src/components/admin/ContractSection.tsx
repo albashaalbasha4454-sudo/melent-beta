@@ -12,7 +12,7 @@ export const ContractSection: React.FC = () => {
     
     // Deriving contracts from orders for demo
     const derived = stored.map((o: any) => ({
-      id: `CON-${o.id.slice(0, 4)}`,
+      id: `CON-${o.id}`,
       client: o.clientName,
       date: o.date,
       status: o.status === 'Delivered' ? 'Active' : 'Draft',

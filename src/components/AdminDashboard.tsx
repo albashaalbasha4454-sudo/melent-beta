@@ -70,6 +70,7 @@ import { ContractSection } from './admin/ContractSection';
 import { LogisticsSection } from './admin/LogisticsSection';
 import { ReportsSection } from './admin/ReportsSection';
 import { ProfitAnalysisSection } from './admin/ProfitAnalysisSection';
+import { B2BSection } from './admin/B2BSection';
 import { SystemManagementSection } from './admin/SystemManagementSection';
 import { LocalDB, LocalStorageManager, MELENT_KEYS } from '../services/localStorageManager';
 import { useLanguage } from '../hooks/useLanguage';
@@ -247,6 +248,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       badge: orders.filter(o => o.status === 'Shipping' || o.status === 'In Transit').length
     },
     { id: 'Finance', icon: ArrowUpRight, label: t('finance') },
+    { id: 'B2B', icon: Briefcase, label: t('b2b_mgmt') },
     { id: 'Profitability', icon: TrendingUp, label: t('profit_analysis') },
     { id: 'Reports', icon: CheckCircle2, label: t('reports') },
     { id: 'Settings', icon: Settings, label: t('settings') },
@@ -549,6 +551,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               <LogisticsSection />
             ) : activeTab === 'Reports' ? (
               <ReportsSection />
+            ) : activeTab === 'B2B' ? (
+              <B2BSection />
             ) : activeTab === 'Profitability' ? (
               <ProfitAnalysisSection orders={orders} products={products} />
             ) : activeTab === 'System' ? (

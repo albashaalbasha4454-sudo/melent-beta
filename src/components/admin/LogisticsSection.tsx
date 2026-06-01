@@ -11,7 +11,7 @@ export const LogisticsSection: React.FC = () => {
     const orders = Array.isArray(raw) ? raw : [];
     
     const derived = orders.map((o: any) => ({
-      id: `SHP-${o.id.slice(0, 4)}`,
+      id: `SHP-${o.id}`,
       destination: o.shipping?.destinationCity || o.clientCity || 'المستودع الرئيسي',
       status: (o.status === 'Delivered' || o.status === 'Received' || o.status === 'Completed') ? 'Arrived' : 'In Transit',
       carrier: o.shipping?.carrier || 'دي إتش إل العالمية (DHL)',
