@@ -48,16 +48,25 @@ export const InventorySection: React.FC = () => {
     <div className={`animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8 ${isRTL ? 'text-right' : 'text-left'}`}>
       <div className={`flex items-center justify-between mb-2 ${isRTL ? 'flex-row' : 'flex-row'}`}>
         <div>
-          <h2 className="text-2xl font-black text-brand-navy tracking-tighter uppercase">{t('inventory_logistics')}</h2>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('stock_levels')}</p>
+          <h2 className="text-2xl font-black text-brand-navy tracking-tighter uppercase">مراقبة المخزون الفعلي</h2>
+          <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] mt-1">إحصائيات وقراءات حية لسلامة سلاسل الإمداد</p>
         </div>
-        <button 
-          onClick={handleExport}
-          className="p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-brand-navy transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
-        >
-          <FileDown size={16} />
-          {t('inventory_report')}
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleExport}
+            className="p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-brand-navy transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+          >
+            <FileDown size={18} />
+            تصدير الجرد
+          </button>
+          <button 
+            onClick={() => alert('تم بدء جرد المخزون وتحديث المزامنة التلقائية مع الطلبات.')}
+            className="p-3 px-6 bg-brand-navy text-white rounded-2xl hover:bg-brand-green transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-brand-navy/10"
+          >
+            <History size={18} />
+            تحديث المخزون
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

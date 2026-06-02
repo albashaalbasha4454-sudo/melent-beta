@@ -276,10 +276,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <div className="mt-auto p-8 pt-0 space-y-4">
                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-black text-brand-navy uppercase tracking-widest">{t('storage_mode')}</p>
+                    <p className="text-[10px] font-black text-brand-navy uppercase tracking-widest leading-none">تأمين البيانات</p>
                     <div className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></div>
                   </div>
-                  <p className="text-[9px] font-bold text-slate-400 italic">{t('local_only')}</p>
+                  <p className="text-[9px] font-black text-brand-green italic tracking-widest">تشفير محلي متكامل</p>
                </div>
                
                <button onClick={onLogout} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all font-bold text-sm ${isRTL ? 'flex-row' : 'flex-row-reverse justify-end'}`}>
@@ -321,24 +321,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </div>
           <div className="flex items-center gap-3 lg:gap-6">
              <LanguageSwitcher />
-             <div className="hidden lg:flex bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 items-center gap-3">
+             <div className="hidden lg:flex items-center gap-4 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
                <div className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></div>
-               <div className={isRTL ? 'text-right' : 'text-left'}>
-                  <p className="text-[9px] font-black text-brand-navy uppercase tracking-widest leading-none">{t('storage_mode')}: {t('all')}</p>
-                  <p className="text-[8px] font-bold text-slate-400 mt-1">{t('secure_browser')}</p>
-               </div>
+               <p className="text-[10px] font-black text-brand-navy uppercase tracking-widest">{t('system_online')}</p>
              </div>
-             <button 
-                onClick={() => setActiveTab('Products')}
-                className="hidden lg:flex px-6 py-2.5 bg-brand-green/10 text-brand-green border border-brand-green/20 rounded-2xl items-center gap-2 font-black text-[10px] uppercase tracking-widest hover:bg-brand-green hover:text-white transition-all shadow-lg shadow-brand-green/5"
-              >
-                <TrendingUp size={16} />
-                {t('price_list')}
-              </button>
-             <button onClick={openAddOrder} className="bg-brand-navy border-2 border-brand-navy text-white px-4 lg:px-6 py-2.5 rounded-2xl flex items-center gap-3 hover:bg-brand-green hover:border-brand-green transition-all shadow-xl shadow-slate-200">
-                <Plus size={18} className="text-brand-cyan" />
-                <span className="text-xs lg:text-sm font-black uppercase tracking-widest whitespace-nowrap">{t('new_transaction')}</span>
-              </button>
+             <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-brand-navy transition-colors cursor-pointer">
+               <Bell size={20} />
+             </div>
           </div>
         </header>
 
@@ -462,20 +451,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                   <div className="lg:col-span-2">
-                    <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row' : 'flex-row'}`}>
-                       <h3 className="text-xl font-black text-brand-navy flex items-center gap-3 tracking-tighter uppercase">{t('recent_contracts')}</h3>
-                       <button onClick={() => setActiveTab('Contracts')} className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-brand-navy">{t('view_all_agreements')}</button>
+                    <div className="flex items-center justify-between mb-6">
+                       <h3 className="text-xl font-black text-brand-navy flex items-center gap-3 tracking-tighter uppercase">آخر العمليات والتوريدات</h3>
+                       <button onClick={() => setActiveTab('Orders')} className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-brand-navy">عرض السجل الكامل</button>
                     </div>
                     <div className="space-y-4">
                        {orders.slice(0, 5).map(order => (
                          <div key={order.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 hover:shadow-xl hover:shadow-slate-200 transition-all cursor-pointer group">
                             <div className={`flex flex-col sm:flex-row items-center gap-5 ${isRTL ? 'sm:flex-row' : 'sm:flex-row'}`}>
-                              <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-brand-navy shrink-0 group-hover:bg-brand-navy group-hover:text-white transition-colors">
+                              <div className="w-16 h-16 rounded-2xl bg-brand-navy/5 flex items-center justify-center text-brand-navy shrink-0 group-hover:bg-brand-navy group-hover:text-white transition-colors">
                                 <Briefcase size={28} />
                               </div>
                               <div className={`grow w-full ${isRTL ? 'text-right' : 'text-left'}`}>
                                 <h4 className="font-black text-brand-navy text-lg">{order.clientName}</h4>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1.5">{t('route')} {order.category}</p>
+                                <p className="text-[10px] text-brand-green font-black uppercase tracking-widest mt-1.5">{order.category} • {order.status}</p>
                               </div>
                               <div className={`flex items-center gap-6 ${isRTL ? 'text-left' : 'text-right'}`}>
                                 <p className="text-xl font-black text-brand-navy tracking-tighter">{(order.financials?.total || 0).toLocaleString()} $</p>
@@ -488,13 +477,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   </div>
                   
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <h3 className="text-xl font-black text-brand-navy mb-6 tracking-tighter uppercase">{t('global_logistics')}</h3>
-                    <div className="bg-brand-navy rounded-[3rem] p-8 text-white relative overflow-hidden">
-                       <div className={`absolute top-0 ${isRTL ? 'right-0' : 'left-0'} w-32 h-32 bg-brand-cyan/20 rounded-full blur-3xl -mr-16 -mt-16`}></div>
-                       <Truck className="mb-6 text-brand-cyan" size={42} />
-                       <h4 className="text-2xl font-black mb-3">{t('shipment_tracking')}</h4>
-                       <p className="text-white/60 text-xs font-bold leading-relaxed mb-6 italic">{t('secure_intl_logistics')}</p>
-                       <button onClick={() => setActiveTab('Logistics')} className="w-full bg-white text-brand-navy py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-green hover:text-white transition-all shadow-xl">{t('shipping_board')}</button>
+                    <h3 className="text-xl font-black text-brand-navy mb-6 tracking-tighter uppercase">الوصول السريع</h3>
+                    <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-4">
+                       {[
+                         { label: 'إنشاء طلب جديد', icon: ShoppingCart, tab: 'Orders', color: 'text-brand-green' },
+                         { label: 'إضافة منتج للكتالوج', icon: Package, tab: 'Products', color: 'text-brand-cyan' },
+                         { label: 'مراجعة التقارير المالية', icon: ArrowUpRight, tab: 'Finance', color: 'text-brand-navy' },
+                         { label: 'تحديث اللوجستيات', icon: Truck, tab: 'Logistics', color: 'text-brand-gold' },
+                       ].map((action, i) => (
+                         <button 
+                          key={i}
+                          onClick={() => setActiveTab(action.tab)}
+                          className="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-brand-navy hover:text-white transition-all group"
+                         >
+                            <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center ${action.color} group-hover:scale-110 transition-transform`}>
+                              <action.icon size={20} />
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-widest">{action.label}</span>
+                         </button>
+                       ))}
                     </div>
                   </div>
                 </div>

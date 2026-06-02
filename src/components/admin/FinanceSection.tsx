@@ -74,8 +74,8 @@ export const FinanceSection: React.FC = () => {
 
       <div className="flex items-center justify-between pb-2 border-b border-slate-50">
         <div>
-          <h3 className="text-xl font-black text-brand-navy">سجل العمليات المالية</h3>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Transaction Ledger & Expenses</p>
+          <h3 className="text-xl font-black text-brand-navy">دفتر الحسابات والتدفق النقدي</h3>
+          <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] mt-1">متابعة المصاريف التشغيلية وصافي الأرباح</p>
         </div>
         <div className="flex items-center gap-3">
           <button 

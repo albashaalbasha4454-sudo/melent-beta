@@ -64,8 +64,8 @@ export const ProductSection: React.FC = () => {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-brand-navy tracking-tight uppercase">إدارة المنتجات والتسعير</h2>
-          <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] mt-1">كتالوج المخزون وهامش الربح</p>
+          <h2 className="text-3xl font-black text-brand-navy tracking-tight uppercase">كتالوج المنتجات</h2>
+          <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] mt-1">مركز إدارة الأسعار ومراقبة جودة المخزون</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button 
@@ -75,38 +75,15 @@ export const ProductSection: React.FC = () => {
             }`}
           >
             <TrendingUp size={16} />
-            تحليل المبيعات (Selling)
+            تحليل الربحية
           </button>
-
-          <button 
-            onClick={handleExport}
-            className="p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-brand-navy hover:bg-slate-50 transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest"
-          >
-            <FileDown size={18} />
-            تصدير
-          </button>
-          
-          <div className="bg-white border border-slate-100 p-1 rounded-xl flex gap-1 shadow-sm">
-            <button 
-              onClick={() => setViewMode('table')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-brand-navy text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'}`}
-            >
-              <List size={18} />
-            </button>
-            <button 
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-brand-navy text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'}`}
-            >
-              <LayoutGrid size={18} />
-            </button>
-          </div>
           
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-brand-navy text-white px-6 py-4 rounded-2xl font-black text-sm shadow-xl shadow-brand-navy/10 hover:bg-brand-green transition-all flex items-center gap-3 group"
+            className="bg-brand-navy text-white px-6 py-4 rounded-2xl font-black text-xs shadow-xl shadow-brand-navy/10 hover:bg-brand-green transition-all flex items-center gap-3 group uppercase tracking-widest"
           >
             <Plus size={18} className="text-brand-cyan group-hover:rotate-90 transition-transform" />
-            منتج جديد (غير مدرج للحجز)
+            إضافة منتج جديد
           </button>
         </div>
       </div>

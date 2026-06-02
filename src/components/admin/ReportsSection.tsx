@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, BarChart3, Filter, CircleDollarSign, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { TrendingUp, BarChart3, Filter, CircleDollarSign, ArrowUpCircle, ArrowDownCircle, FileDown } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useData } from '../../hooks/useData';
 import { Currency } from '../../types';
@@ -100,37 +100,47 @@ export const ReportsSection: React.FC = () => {
       {/* Header & Filter */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
         <div>
-          <h2 className="text-3xl font-black text-brand-navy tracking-tighter uppercase">التحليل المالي الاستراتيجي</h2>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">تجميع ذكي للبيانات عبر كافة العملات المسجلة</p>
+          <h2 className="text-3xl font-black text-brand-navy tracking-tighter uppercase">مركز التحول والتقارير الاستراتيجية</h2>
+          <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] mt-1">ذكاء الأعمال وتحليل الربحية الموحد</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
-          <button
-            onClick={() => setSelectedCurrency('ALL')}
-            className={`px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
-              selectedCurrency === 'ALL' 
-              ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' 
-              : 'text-slate-400 hover:text-brand-navy'
-            }`}
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => alert('جاري تحويل البيانات إلى تنسيق استراتيجي موحد للطباعة...')}
+            className="p-3 px-6 bg-white border border-slate-100 rounded-2xl text-brand-navy hover:bg-brand-navy hover:text-white transition-all flex items-center gap-3 text-[10px] font-black uppercase tracking-widest shadow-sm"
           >
-            الموحد (USD)
+            <FileDown size={18} className="text-brand-cyan" />
+            طباعة تقرير الأداء
           </button>
-          <div className="w-px h-6 bg-slate-200 mx-1"></div>
-          {(['USD', 'TRY', 'EUR'] as Currency[]).map((curr) => (
+
+          <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
             <button
-              key={curr}
-              onClick={() => setSelectedCurrency(curr)}
-              className={`px-6 py-2.5 rounded-xl font-black text-xs transition-all ${
-                selectedCurrency === curr 
-                ? 'bg-brand-navy text-white shadow-lg shadow-brand-navy/20' 
+              onClick={() => setSelectedCurrency('ALL')}
+              className={`px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                selectedCurrency === 'ALL' 
+                ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' 
                 : 'text-slate-400 hover:text-brand-navy'
               }`}
             >
-              {curr}
+              الموحد (USD)
             </button>
-          ))}
-          <div className="mx-2 p-2 bg-white rounded-lg text-slate-300">
-            <Filter size={14} />
+            <div className="w-px h-6 bg-slate-200 mx-1"></div>
+            {(['USD', 'TRY', 'EUR'] as Currency[]).map((curr) => (
+              <button
+                key={curr}
+                onClick={() => setSelectedCurrency(curr)}
+                className={`px-6 py-2.5 rounded-xl font-black text-xs transition-all ${
+                  selectedCurrency === curr 
+                  ? 'bg-brand-navy text-white shadow-lg shadow-brand-navy/20' 
+                  : 'text-slate-400 hover:text-brand-navy'
+                }`}
+              >
+                {curr}
+              </button>
+            ))}
+            <div className="mx-2 p-2 bg-white rounded-lg text-slate-300">
+              <Filter size={14} />
+            </div>
           </div>
         </div>
       </div>

@@ -55,10 +55,10 @@ export const B2BSection: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
         <div className={isRTL ? 'text-right' : 'text-left'}>
           <p className="text-[10px] font-black uppercase text-brand-green tracking-[0.3em] mb-1">
-            B2B Business Development
+            B2B Business Intelligence
           </p>
           <h2 className="text-3xl font-black text-brand-navy tracking-tighter uppercase">
-            {t('b2b_mgmt')}
+            تطوير الأعمال والشركات
           </h2>
         </div>
         

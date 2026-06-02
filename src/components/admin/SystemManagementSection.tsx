@@ -111,11 +111,18 @@ export const SystemManagementSection: React.FC = () => {
       {/* Dynamic Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
         <div>
-          <h2 className="text-3xl font-black text-brand-navy tracking-tighter uppercase">مركز إدارة النظام</h2>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">إدارة التخزين المشفر والأرشفة والنسخ الاحتياطي</p>
+          <h2 className="text-3xl font-black text-brand-navy tracking-tighter uppercase">مركز التحكم والأمن السيبراني</h2>
+          <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] mt-1">إدارة الخوادم المحلية، الأرشفة الذكية، والبروتوكولات الأمنية</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+        <div className="flex items-center gap-3">
+          <button 
+             onClick={handleExport}
+             className="hidden md:flex p-3 px-6 bg-brand-navy text-white rounded-2xl hover:bg-brand-green transition-all items-center gap-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-brand-navy/10"
+          >
+             <Database size={18} className="text-brand-cyan" />
+             نسخ احتياطي فوري
+          </button>
           <button 
             onClick={() => setActiveTab('OVERVIEW')}
             className={`px-6 py-2.5 rounded-xl font-black text-xs transition-all ${activeTab === 'OVERVIEW' ? 'bg-brand-navy text-white' : 'text-slate-400'}`}
