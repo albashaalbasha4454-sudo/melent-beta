@@ -74,69 +74,35 @@ import { B2BSection } from './admin/B2BSection';
 import { SystemManagementSection } from './admin/SystemManagementSection';
 import { LocalDB, LocalStorageManager, MELENT_KEYS } from '../services/localStorageManager';
 import { useLanguage } from '../hooks/useLanguage';
+import { useData } from '../hooks/useData';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const { t, isRTL } = useLanguage();
+  const { 
+    orders, products, expenses, 
+    addOrder, refreshData, getProfitSummary, syncInventory
+  } = useData();
+  
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Data State
-  const [orders, setOrders] = useState<MedicalOrder[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-
   // Initialize System
   useEffect(() => {
     LocalDB.initialize();
-  }, []);
-
-  // Initialize Data from Local Storage or Mock
-  useEffect(() => {
+    // Ensure initial data is loaded if empty
     const isInitialized = localStorage.getItem('melent_database_initialized') === 'true';
-    const storedOrders = LocalStorageManager.get(MELENT_KEYS.ORDERS);
-    const storedProducts = LocalStorageManager.get(MELENT_KEYS.PRODUCTS);
-    const storedExpenses = LocalStorageManager.get(MELENT_KEYS.EXPENSES);
-    
-    if (storedOrders) {
-      setOrders(storedOrders);
-    } else if (!isInitialized) {
-      setOrders(mockMedicalOrders);
-      LocalStorageManager.save(MELENT_KEYS.ORDERS, mockMedicalOrders);
-    }
-
-    if (storedProducts) {
-      setProducts(storedProducts);
-    } else if (!isInitialized) {
-      setProducts(mockProducts);
-      LocalStorageManager.save(MELENT_KEYS.PRODUCTS, mockProducts);
-    }
-
-    if (storedExpenses) {
-      setExpenses(storedExpenses);
-    } else if (!isInitialized) {
-      setExpenses(mockExpenses);
-      LocalStorageManager.save(MELENT_KEYS.EXPENSES, mockExpenses);
-    }
-
     if (!isInitialized) {
+      LocalStorageManager.save(MELENT_KEYS.ORDERS, mockMedicalOrders);
+      LocalStorageManager.save(MELENT_KEYS.PRODUCTS, mockProducts);
+      LocalStorageManager.save('melent_initial_products', mockProducts);
+      LocalStorageManager.save(MELENT_KEYS.EXPENSES, mockExpenses);
       localStorage.setItem('melent_database_initialized', 'true');
+      refreshData();
     }
-  }, []);
-
-  // Update Storage when state changes
-  useEffect(() => {
-    if (orders.length > 0) {
-      LocalStorageManager.save(MELENT_KEYS.ORDERS, orders);
-    }
-  }, [orders]);
-
-  useEffect(() => {
-    if (expenses.length > 0) {
-      LocalStorageManager.save(MELENT_KEYS.EXPENSES, expenses);
-    }
-  }, [expenses]);
+    syncInventory();
+  }, [refreshData, syncInventory]);
 
   // Modal States
   const [isAddOrderOpen, setIsAddOrderOpen] = useState(false);
@@ -173,15 +139,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
   // Stats Calculations
   const stats = useMemo(() => {
-    const totalRevenue = orders.filter(o => o.status === 'Delivered').reduce((acc, o) => acc + (o.financials?.total || 0), 0);
-    const totalExpenses = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+    const summary = getProfitSummary();
     const totalOrderValue = orders.reduce((acc, o) => acc + (o.financials?.total || 0), 0);
     const activeContracts = orders.filter(o => o.status !== 'Cancelled' && o.status !== 'Delivered').length;
 
-    const margin = totalOrderValue > 0 ? ((totalOrderValue - totalExpenses) / totalOrderValue) * 100 : 0;
-
-    return { totalRevenue, totalExpenses, activeContracts, margin };
-  }, [orders, expenses]);
+    return { 
+      totalRevenue: summary.revenue, 
+      totalExpenses: summary.costs, 
+      activeContracts, 
+      margin: summary.margin 
+    };
+  }, [orders, getProfitSummary]);
 
   // Weekly Chart Data
   const weeklyChartData = useMemo(() => {
@@ -209,11 +177,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   }, [orders, t]);
 
   const handleAddOrder = (order: MedicalOrder) => {
-    setOrders(prev => {
-      const exists = prev.find(o => o.id === order.id);
-      if (exists) return prev.map(o => o.id === order.id ? order : o);
-      return [order, ...prev];
-    });
+    addOrder(order);
     setEditingOrder(null);
     setIsAddOrderOpen(false);
   };

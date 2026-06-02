@@ -2,22 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { History, Package, AlertCircle, ArrowDown, ArrowUp, FileDown } from 'lucide-react';
 import { DataTable } from '../DataTable';
 import { Product } from '../../types';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
-import { mockProducts } from '../../data';
 import { useLanguage } from '../../hooks/useLanguage';
+import { useData } from '../../hooks/useData';
 
 export const InventorySection: React.FC = () => {
   const { t, isRTL } = useLanguage();
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const stored = LocalStorageManager.get(MELENT_KEYS.PRODUCTS);
-    if (stored && stored.length > 0) {
-      setProducts(stored);
-    } else {
-      setProducts(mockProducts);
-    }
-  }, []);
+  const { products } = useData();
 
   const handleExport = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));

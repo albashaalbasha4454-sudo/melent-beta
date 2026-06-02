@@ -1,25 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, FileCheck, Clock, Download, Plus } from 'lucide-react';
 import { DataTable } from '../DataTable';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
+import { useData } from '../../hooks/useData';
 
 export const ContractSection: React.FC = () => {
-  const [contracts, setContracts] = useState<any[]>([]);
+  const { orders } = useData();
 
-  useEffect(() => {
-    const raw = LocalStorageManager.get(MELENT_KEYS.ORDERS);
-    const stored = Array.isArray(raw) ? raw : [];
-    
-    // Deriving contracts from orders for demo
-    const derived = stored.map((o: any) => ({
-      id: `CON-${o.id}`,
-      client: o.clientName,
-      date: o.date,
-      status: o.status === 'Delivered' ? 'Active' : 'Draft',
-      value: o.financials?.total || 0
-    }));
-    setContracts(derived);
-  }, []);
+  // Deriving contracts from orders for demo
+  const contracts = orders.map((o: any) => ({
+    id: `CON-${o.id}`,
+    client: o.clientName,
+    date: o.date,
+    status: o.status === 'Delivered' ? 'Active' : 'Draft',
+    value: o.financials?.total || 0
+  }));
 
   const handleDownload = (c: any) => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(c, null, 2));

@@ -17,8 +17,8 @@ import {
   FileText
 } from 'lucide-react';
 import { useLanguage } from '../../hooks/useLanguage';
+import { useData } from '../../hooks/useData';
 import { B2BCompany, B2BDeal, B2BFollowUp, B2BProductB2B } from '../../types';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
 
 // Sub-components (we will define them in separate files for better modularity)
 import { B2BDashboard } from './b2b/B2BDashboard';
@@ -31,18 +31,16 @@ export const B2BSection: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState<'Dashboard' | 'Companies' | 'Deals' | 'FollowUps' | 'Products'>('Dashboard');
   
-  const [companies, setCompanies] = useState<B2BCompany[]>([]);
-  const [deals, setDeals] = useState<B2BDeal[]>([]);
-  const [followUps, setFollowUps] = useState<B2BFollowUp[]>([]);
-  const [products, setProducts] = useState<B2BProductB2B[]>([]);
-
-  useEffect(() => {
-    // Load data from localStorage
-    setCompanies(LocalStorageManager.get(MELENT_KEYS.B2B_COMPANIES) || []);
-    setDeals(LocalStorageManager.get(MELENT_KEYS.B2B_DEALS) || []);
-    setFollowUps(LocalStorageManager.get(MELENT_KEYS.B2B_FOLLOWUPS) || []);
-    setProducts(LocalStorageManager.get(MELENT_KEYS.B2B_PRODUCTS) || []);
-  }, []);
+  const { 
+    b2bCompanies: companies, 
+    b2bDeals: deals, 
+    b2bFollowUps: followUps, 
+    b2bProducts: products,
+    setB2BCompanies,
+    setB2BDeals,
+    setB2BFollowUps,
+    setB2BProducts
+  } = useData();
 
   const tabs = [
     { id: 'Dashboard', label: t('dashboard'), icon: BarChart3 },
@@ -87,16 +85,16 @@ export const B2BSection: React.FC = () => {
           <B2BDashboard companies={companies} deals={deals} followUps={followUps} />
         )}
         {activeTab === 'Companies' && (
-          <B2BCompaniesTable companies={companies} onUpdate={setCompanies} />
+          <B2BCompaniesTable companies={companies} onUpdate={setB2BCompanies} />
         )}
         {activeTab === 'Deals' && (
-          <B2BDealsTable deals={deals} companies={companies} onUpdate={setDeals} />
+          <B2BDealsTable deals={deals} companies={companies} onUpdate={setB2BDeals} />
         )}
         {activeTab === 'FollowUps' && (
-          <B2BFollowUpsTable followUps={followUps} deals={deals} onUpdate={setFollowUps} />
+          <B2BFollowUpsTable followUps={followUps} deals={deals} onUpdate={setB2BFollowUps} />
         )}
         {activeTab === 'Products' && (
-          <B2BPortfolioSection products={products} onUpdate={setProducts} />
+          <B2BPortfolioSection products={products} onUpdate={setB2BProducts} />
         )}
       </div>
     </div>

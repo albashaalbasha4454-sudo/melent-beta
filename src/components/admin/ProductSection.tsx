@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Filter, Edit2, Trash2, LayoutGrid, List, FileDown, TrendingUp, DollarSign, ArrowUpRight } from 'lucide-react';
 import { Product } from '../../types';
-import { mockProducts } from '../../data';
 import { DataTable } from '../DataTable';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
+import { useData } from '../../hooks/useData';
 import { AddProductModal } from '../modals/AddProductModal';
 
 export const ProductSection: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { products, setProducts } = useData();
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'selling'>('table');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-  useEffect(() => {
-    const stored = LocalStorageManager.get(MELENT_KEYS.PRODUCTS);
-    if (stored && stored.length > 0) {
-      setProducts(stored);
-    } else {
-      setProducts(mockProducts);
-      LocalStorageManager.save(MELENT_KEYS.PRODUCTS, mockProducts);
-    }
-  }, []);
 
   const handleAddOrUpdateProduct = (product: Product) => {
     const updated = editingProduct 
@@ -28,15 +17,13 @@ export const ProductSection: React.FC = () => {
       : [product, ...products];
     
     setProducts(updated);
-    LocalStorageManager.save(MELENT_KEYS.PRODUCTS, updated);
     setEditingProduct(null);
   };
 
   const handleDelete = (id: string, name: string) => {
     if (confirm(`هل أنت متأكد من نقل "${name}" إلى سلة المهملات؟`)) {
-      if (LocalStorageManager.softDelete(MELENT_KEYS.PRODUCTS, id, 'PRODUCT', name)) {
-        setProducts(prev => prev.filter(p => p.id !== id));
-      }
+      const updated = products.filter(p => p.id !== id);
+      setProducts(updated);
     }
   };
 

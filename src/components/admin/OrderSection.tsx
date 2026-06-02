@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, Search, Filter, Printer, Edit2, Trash2, FileDown, Layers, User, Building2, Plus, Check, Truck, MapPin } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Printer, Edit2, Trash2, FileDown, Layers, User, Building2, Plus, Check, Truck, MapPin, XCircle } from 'lucide-react';
 import { DataTable } from '../DataTable';
 import { MedicalOrder } from '../../types';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
-import { mockMedicalOrders } from '../../data';
 import { useLanguage } from '../../hooks/useLanguage';
+import { useData } from '../../hooks/useData';
 
 export const OrderSection: React.FC<{ 
   onEditOrder?: (order: MedicalOrder) => void,
@@ -13,18 +12,8 @@ export const OrderSection: React.FC<{
 }> = ({ onEditOrder, onViewInvoice, onAddOrder }) => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
-  const [orders, setOrders] = useState<MedicalOrder[]>([]);
+  const { orders, setOrders, deleteOrder, syncInventory } = useData();
   const [typeFilter, setTypeFilter] = useState<'All' | 'Individual' | 'Corporate'>('All');
-
-  useEffect(() => {
-    const stored = LocalStorageManager.get(MELENT_KEYS.ORDERS);
-    if (stored && stored.length > 0) {
-      setOrders(stored);
-    } else {
-      setOrders(mockMedicalOrders);
-      LocalStorageManager.save(MELENT_KEYS.ORDERS, mockMedicalOrders);
-    }
-  }, []);
 
   const filteredOrders = useMemo(() => {
     if (typeFilter === 'All') return orders;
@@ -46,10 +35,15 @@ export const OrderSection: React.FC<{
 
   const handleDelete = (id: string, clientName: string) => {
     if (confirm(`هل أنت متأكد من أرشفة الطلب الخاص بـ ${clientName}؟`)) {
-      if (LocalStorageManager.softDelete(MELENT_KEYS.ORDERS, id, 'ORDER', `طلب: ${clientName}`)) {
-        setOrders(prev => prev.filter(o => o.id !== id));
-      }
+      deleteOrder(id);
+      syncInventory();
     }
+  };
+
+  const updateOrderStatus = (id: string, newStatus: MedicalOrder['status']) => {
+    const updated = orders.map(ord => ord.id === id ? { ...ord, status: newStatus } : ord);
+    setOrders(updated);
+    syncInventory();
   };
 
   const columns = [
@@ -99,11 +93,7 @@ export const OrderSection: React.FC<{
         <div className="flex items-center gap-2">
           {o.status === 'Admin Review' && (
             <button 
-              onClick={() => {
-                const updated = orders.map(ord => ord.id === o.id ? { ...ord, status: 'Processing' as any } : ord);
-                setOrders(updated);
-                LocalStorageManager.save(MELENT_KEYS.ORDERS, updated);
-              }}
+              onClick={() => updateOrderStatus(o.id, 'Processing')}
               className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-all flex items-center gap-2"
               title={t('approve')}
             >
@@ -113,11 +103,7 @@ export const OrderSection: React.FC<{
           )}
           {o.status === 'Processing' && (
             <button 
-              onClick={() => {
-                const updated = orders.map(ord => ord.id === o.id ? { ...ord, status: 'Shipping' as any } : ord);
-                setOrders(updated);
-                LocalStorageManager.save(MELENT_KEYS.ORDERS, updated);
-              }}
+              onClick={() => updateOrderStatus(o.id, 'Shipping')}
               className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition-all flex items-center gap-2"
               title={t('prepare')}
             >
@@ -127,11 +113,7 @@ export const OrderSection: React.FC<{
           )}
           {o.status === 'Shipping' && (
             <button 
-              onClick={() => {
-                const updated = orders.map(ord => ord.id === o.id ? { ...ord, status: 'In Transit' as any } : ord);
-                setOrders(updated);
-                LocalStorageManager.save(MELENT_KEYS.ORDERS, updated);
-              }}
+              onClick={() => updateOrderStatus(o.id, 'In Transit')}
               className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all flex items-center gap-2"
               title={t('ship')}
             >
@@ -141,11 +123,7 @@ export const OrderSection: React.FC<{
           )}
           {o.status === 'In Transit' && (
             <button 
-              onClick={() => {
-                const updated = orders.map(ord => ord.id === o.id ? { ...ord, status: 'Received' as any } : ord);
-                setOrders(updated);
-                LocalStorageManager.save(MELENT_KEYS.ORDERS, updated);
-              }}
+              onClick={() => updateOrderStatus(o.id, 'Received')}
               className="p-2 bg-brand-green/10 text-brand-green rounded-lg hover:bg-brand-green hover:text-white transition-all flex items-center gap-2"
               title={t('receive')}
             >
@@ -153,6 +131,18 @@ export const OrderSection: React.FC<{
               <span className="text-[10px] font-black uppercase">{t('receive')}</span>
             </button>
           )}
+          <button 
+            onClick={() => {
+              if (confirm(t('confirm_cancel_order') || 'Are you sure you want to cancel this order?')) {
+                updateOrderStatus(o.id, 'Cancelled');
+              }
+            }}
+            className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
+            title={t('cancel')}
+          >
+            <XCircle size={14} />
+            <span className="text-[10px] font-black uppercase">{t('cancel')}</span>
+          </button>
           <button 
             onClick={() => onViewInvoice?.(o)}
             className="p-2 bg-slate-50 text-slate-400 rounded-lg hover:text-brand-navy"

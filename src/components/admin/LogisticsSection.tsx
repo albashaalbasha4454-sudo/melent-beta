@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Truck, MapPin, Package, Clock, ShieldCheck } from 'lucide-react';
 import { DataTable } from '../DataTable';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
+import { useData } from '../../hooks/useData';
 
 export const LogisticsSection: React.FC = () => {
-  const [shipments, setShipments] = useState<any[]>([]);
+  const { orders } = useData();
 
-  useEffect(() => {
-    const raw = LocalStorageManager.get(MELENT_KEYS.ORDERS);
-    const orders = Array.isArray(raw) ? raw : [];
-    
-    const derived = orders.map((o: any) => ({
-      id: `SHP-${o.id}`,
-      destination: o.shipping?.destinationCity || o.clientCity || 'المستودع الرئيسي',
-      status: (o.status === 'Delivered' || o.status === 'Received' || o.status === 'Completed') ? 'Arrived' : 'In Transit',
-      carrier: o.shipping?.carrier || 'دي إتش إل العالمية (DHL)',
-      weight: o.shipping?.weight || '45kg'
-    }));
-    setShipments(derived);
-  }, []);
+  const shipments = orders.map((o: any) => ({
+    id: `SHP-${o.id}`,
+    destination: o.shipping?.destinationCountry || o.clientCountry || 'المستودع الرئيسي',
+    status: (o.status === 'Delivered' || o.status === 'Received' || o.status === 'Completed') ? 'Arrived' : 'In Transit',
+    carrier: o.shipping?.carrier || 'دي إتش إل العالمية (DHL)',
+    weight: o.shipping?.weight || '45kg'
+  }));
+
+  const stats = [
+    { label: 'شحنات قيد الوصول', value: orders.filter(o => o.status === 'Shipping' || o.status === 'In Transit').length.toString(), icon: Clock, color: 'text-amber-500' },
+    { label: 'شحنات مستلمة', value: orders.filter(o => o.status === 'Received' || o.status === 'Delivered' || o.status === 'Completed').length.toString(), icon: ShieldCheck, color: 'text-green-500' },
+    { label: 'إجمالي الوزن المعالج', value: '850kg', icon: Package, color: 'text-brand-cyan' },
+  ];
 
   const columns = [
     { header: 'رقم الشحنة', accessor: (s: any) => <span className="font-mono text-[10px] font-black">{s.id}</span> },
@@ -60,11 +60,7 @@ export const LogisticsSection: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-right" dir="rtl">
-        {[
-          { label: 'شحنات قيد الوصول', value: '4', icon: Clock, color: 'text-amber-500' },
-          { label: 'شحنات مستلمة', value: '12', icon: ShieldCheck, color: 'text-green-500' },
-          { label: 'إجمالي الوزن المعالج', value: '850kg', icon: Package, color: 'text-brand-cyan' },
-        ].map((item, i) => (
+        {stats.map((item, i) => (
           <div key={i} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center gap-6">
             <div className={`w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center ${item.color}`}>
               <item.icon size={28} />

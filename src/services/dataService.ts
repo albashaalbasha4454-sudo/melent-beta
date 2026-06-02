@@ -1,87 +1,142 @@
-import { EventEmitter } from 'events';
+import { MELENT_KEYS, LocalStorageManager } from './localStorageManager';
+import { MedicalOrder, Product, Expense, B2BCompany, B2BDeal, B2BFollowUp, B2BProductB2B } from '../types';
 
-export type OrderStatus = 'draft' | 'confirmed' | 'processing' | 'completed' | 'cancelled';
+export const DATA_UPDATED_EVENT = 'melent-data-updated';
 
-export interface Order {
-  id: string;
-  clientId: string;
-  productId?: string;
-  supplierId?: string;
-  logisticsId?: string;
-  contractId?: string;
+export const DataService = {
+  // Orders
+  getOrders: (): MedicalOrder[] => {
+    return LocalStorageManager.get(MELENT_KEYS.ORDERS) || [];
+  },
 
-  quantity: number;
-  salePrice: number;
-  costPrice: number;
-  logisticsCost: number;
-  extraCost: number;
+  setOrders: (orders: MedicalOrder[]) => {
+    LocalStorageManager.save(MELENT_KEYS.ORDERS, orders);
+    window.dispatchEvent(new CustomEvent(DATA_UPDATED_EVENT, { detail: { key: MELENT_KEYS.ORDERS } }));
+  },
 
-  revenue: number;
-  totalCost: number;
-  grossProfit: number;
-
-  status: OrderStatus;
-  createdAt: string;
-  cancelledAt?: string;
-}
-
-class DataService extends EventEmitter {
-  private static instance: DataService;
-  private orders: Order[] = [];
-
-  private constructor() {
-    super();
-    const saved = localStorage.getItem('melent_orders');
-    if (saved) {
-      this.orders = JSON.parse(saved);
+  addOrder: (order: MedicalOrder) => {
+    const orders = DataService.getOrders();
+    const exists = orders.findIndex(o => o.id === order.id);
+    if (exists > -1) {
+      orders[exists] = order;
+    } else {
+      orders.unshift(order);
     }
-  }
+    DataService.setOrders(orders);
+  },
 
-  public static getInstance(): DataService {
-    if (!DataService.instance) {
-      DataService.instance = new DataService();
-    }
-    return DataService.instance;
-  }
+  cancelOrder: (orderId: string) => {
+    const orders = DataService.getOrders().map(order => 
+      order.id === orderId ? { ...order, status: 'Cancelled' as const } : order
+    );
+    DataService.setOrders(orders);
+  },
 
-  private save() {
-    localStorage.setItem('melent_orders', JSON.stringify(this.orders));
-    this.emit('update');
-  }
+  deleteOrder: (orderId: string) => {
+    // We use softDelete for audit trails, but for this reactivity we can just filter
+    const orders = DataService.getOrders().filter(o => o.id !== orderId);
+    DataService.setOrders(orders);
+    // Also trigger the soft delete in LocalStorageManager if we want the recycle bin
+    LocalStorageManager.softDelete(MELENT_KEYS.ORDERS, orderId, 'ORDER', `Order ID: ${orderId}`);
+  },
 
-  public getOrders() {
-    return this.orders;
-  }
+  // Products
+  getProducts: (): Product[] => {
+    return LocalStorageManager.get(MELENT_KEYS.PRODUCTS) || [];
+  },
 
-  public getActiveOrders() {
-    return this.orders.filter(o => o.status !== 'cancelled');
-  }
+  setProducts: (products: Product[]) => {
+    LocalStorageManager.save(MELENT_KEYS.PRODUCTS, products);
+    window.dispatchEvent(new CustomEvent(DATA_UPDATED_EVENT, { detail: { key: MELENT_KEYS.PRODUCTS } }));
+  },
 
-  public getProfitSummary() {
-    const activeOrders = this.getActiveOrders();
+  // Expenses
+  getExpenses: (): Expense[] => {
+    return LocalStorageManager.get(MELENT_KEYS.EXPENSES) || [];
+  },
+
+  setExpenses: (expenses: Expense[]) => {
+    LocalStorageManager.save(MELENT_KEYS.EXPENSES, expenses);
+    window.dispatchEvent(new CustomEvent(DATA_UPDATED_EVENT, { detail: { key: MELENT_KEYS.EXPENSES } }));
+  },
+
+  // B2B Data
+  getB2BCompanies: (): B2BCompany[] => LocalStorageManager.get(MELENT_KEYS.B2B_COMPANIES) || [],
+  getB2BDeals: (): B2BDeal[] => LocalStorageManager.get(MELENT_KEYS.B2B_DEALS) || [],
+  getB2BFollowUps: (): B2BFollowUp[] => LocalStorageManager.get(MELENT_KEYS.B2B_FOLLOWUPS) || [],
+  getB2BProducts: (): B2BProductB2B[] => LocalStorageManager.get(MELENT_KEYS.B2B_PRODUCTS) || [],
+
+  setB2BCompanies: (data: B2BCompany[]) => {
+    LocalStorageManager.save(MELENT_KEYS.B2B_COMPANIES, data);
+    window.dispatchEvent(new CustomEvent(DATA_UPDATED_EVENT, { detail: { key: MELENT_KEYS.B2B_COMPANIES } }));
+  },
+  setB2BDeals: (data: B2BDeal[]) => {
+    LocalStorageManager.save(MELENT_KEYS.B2B_DEALS, data);
+    window.dispatchEvent(new CustomEvent(DATA_UPDATED_EVENT, { detail: { key: MELENT_KEYS.B2B_DEALS } }));
+  },
+  setB2BFollowUps: (data: B2BFollowUp[]) => {
+    LocalStorageManager.save(MELENT_KEYS.B2B_FOLLOWUPS, data);
+    window.dispatchEvent(new CustomEvent(DATA_UPDATED_EVENT, { detail: { key: MELENT_KEYS.B2B_FOLLOWUPS } }));
+  },
+  setB2BProducts: (data: B2BProductB2B[]) => {
+    LocalStorageManager.save(MELENT_KEYS.B2B_PRODUCTS, data);
+    window.dispatchEvent(new CustomEvent(DATA_UPDATED_EVENT, { detail: { key: MELENT_KEYS.B2B_PRODUCTS } }));
+  },
+
+  // Inventory Sync
+  syncInventory: () => {
+    const orders = DataService.getOrders();
+    const products = DataService.getProducts();
+    const initialProducts = LocalStorageManager.get('melent_initial_products') || products;
+    
+    // We assume stock = initial - quantity of processed orders
+    const processedOrders = orders.filter(o => !['Cancelled', 'Rejected', 'Draft'].includes(o.status));
+    
+    const updatedProducts = initialProducts.map((p: Product) => {
+      const soldQuantity = processedOrders.reduce((acc, order) => {
+        const item = order.items.find(i => i.productId === p.id);
+        return acc + (item?.quantity || 0);
+      }, 0);
+      return { ...p, stock: Math.max(0, p.stock - soldQuantity) };
+    });
+
+    DataService.setProducts(updatedProducts);
+  },
+
+  // Calculations
+  getProfitSummary: () => {
+    const orders = DataService.getOrders();
+    const activeOrders = orders.filter(o => !['Cancelled', 'Rejected'].includes(o.status));
+    
+    // In this app, MedicalOrder.items don't have purchase price directly in the order item,
+    // they reference products. So we need products too.
+    const products = DataService.getProducts();
+
+    let totalRevenue = 0;
+    let totalCost = 0;
+
+    activeOrders.forEach(order => {
+      totalRevenue += (order.financials?.total || 0);
+      
+      order.items.forEach(item => {
+        const product = products.find(p => p.id === item.productId);
+        const unitCost = product?.purchasePrice || 0;
+        totalCost += (unitCost * item.quantity);
+      });
+
+      // Add other fees to costs if they are internal costs (customs, shipping if paid by Melent)
+      if (order.shipping?.paidBy === 'MELENT CARE') {
+        totalCost += (order.shipping?.shippingCost || 0);
+      }
+      totalCost += (order.financials?.customsFee || 0);
+    });
+
     return {
-      ordersCount: activeOrders.length,
-      totalRevenue: activeOrders.reduce((sum, o) => sum + o.revenue, 0),
-      totalCost: activeOrders.reduce((sum, o) => sum + o.totalCost, 0),
-      grossProfit: activeOrders.reduce((sum, o) => sum + o.grossProfit, 0),
+      count: activeOrders.length,
+      revenue: totalRevenue,
+      costs: totalCost,
+      profit: totalRevenue - totalCost,
+      margin: totalRevenue > 0 ? ((totalRevenue - totalCost) / totalRevenue) * 100 : 0
     };
   }
-
-  public addOrder(order: Order) {
-    this.orders.push(order);
-    this.save();
-  }
-
-  public cancelOrder(orderId: string) {
-    this.orders = this.orders.map(o => o.id === orderId ? {...o, status: 'cancelled', cancelledAt: new Date().toISOString()} : o);
-    this.save();
-  }
-
-  public deleteOrder(orderId: string) {
-    this.orders = this.orders.filter(o => o.id !== orderId);
-    this.save();
-  }
-
-}
-
-export const dataService = DataService.getInstance();
+};

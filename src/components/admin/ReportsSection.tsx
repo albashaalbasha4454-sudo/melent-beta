@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, BarChart3, Filter, CircleDollarSign, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
-import { MedicalOrder, Expense, Currency } from '../../types';
-import { mockMedicalOrders, mockExpenses } from '../../data';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useData } from '../../hooks/useData';
+import { Currency } from '../../types';
 
 const ChartWrapper: React.FC<{ children: React.ReactNode; height: number | string }> = ({ children, height }) => {
   const [isReady, setIsReady] = React.useState(false);
@@ -20,6 +19,7 @@ const ChartWrapper: React.FC<{ children: React.ReactNode; height: number | strin
 };
 
 export const ReportsSection: React.FC = () => {
+  const { orders, expenses } = useData();
   const [selectedCurrency, setSelectedCurrency] = useState<Currency | 'ALL'>('ALL');
   const [chartData, setChartData] = useState<any[]>([]);
   const [stats, setStats] = useState({ revenue: 0, expenses: 0, profit: 0 });
@@ -37,12 +37,6 @@ export const ReportsSection: React.FC = () => {
   };
 
   useEffect(() => {
-    const rawOrders = LocalStorageManager.get(MELENT_KEYS.ORDERS);
-    const rawExpenses = LocalStorageManager.get(MELENT_KEYS.EXPENSES);
-    
-    const orders: MedicalOrder[] = Array.isArray(rawOrders) ? rawOrders : mockMedicalOrders;
-    const expenses: Expense[] = Array.isArray(rawExpenses) ? rawExpenses : (mockExpenses as any).map((e: any) => ({ ...e, currency: 'USD' }));
-
     const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
     
     const monthlyAggregation = months.map((month, index) => {

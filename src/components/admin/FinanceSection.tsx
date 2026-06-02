@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet, PieChart, Plus, FileDown } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet, FileDown, Plus } from 'lucide-react';
 import { DataTable } from '../DataTable';
-import { Expense, MedicalOrder } from '../../types';
-import { LocalStorageManager, MELENT_KEYS } from '../../services/localStorageManager';
-import { mockExpenses, mockMedicalOrders } from '../../data';
+import { Expense } from '../../types';
+import { useData } from '../../hooks/useData';
 import { AddExpenseModal } from '../modals/AddExpenseModal';
 
 export const FinanceSection: React.FC = () => {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [orders, setOrders] = useState<MedicalOrder[]>([]);
+  const { orders, expenses, setExpenses, getProfitSummary } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-
-  useEffect(() => {
-    const storedExpenses = LocalStorageManager.get(MELENT_KEYS.EXPENSES) || mockExpenses;
-    const storedOrders = LocalStorageManager.get(MELENT_KEYS.ORDERS) || mockMedicalOrders;
-    setExpenses(storedExpenses);
-    setOrders(storedOrders);
-  }, []);
 
   const handleAddOrUpdate = (expense: Expense) => {
     const updated = editingExpense 
@@ -25,15 +16,13 @@ export const FinanceSection: React.FC = () => {
       : [expense, ...expenses];
     
     setExpenses(updated);
-    LocalStorageManager.save(MELENT_KEYS.EXPENSES, updated);
     setEditingExpense(null);
   };
 
   const handleDelete = (id: string, description: string) => {
     if (confirm(`هل أنت متأكد من حذف حركة المصاريف: "${description}"؟`)) {
-      if (LocalStorageManager.softDelete(MELENT_KEYS.EXPENSES, id, 'EXPENSE', description)) {
-        setExpenses(prev => prev.filter(e => e.id !== id));
-      }
+        const updated = expenses.filter(e => e.id !== id);
+        setExpenses(updated);
     }
   };
 
@@ -47,9 +36,13 @@ export const FinanceSection: React.FC = () => {
     downloadAnchorNode.remove();
   };
 
-  const totalRevenue = orders.filter(o => o.status === 'Delivered' || o.status === 'Completed' || o.status === 'Paid').reduce((acc, o) => acc + (o.financials?.total || 0), 0);
-  const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
-  const netProfit = totalRevenue - totalExpenses;
+  const summary = getProfitSummary();
+  const totalRevenue = summary.revenue;
+  const totalExpenses = summary.costs; // Note: DataService includes item costs too. 
+  // If this view only wants "Operational Expenses", we should filter.
+  // But usually summary.revenue - summary.costs is the actual net.
+  const operationalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
+  const netProfit = totalRevenue - totalExpenses - operationalExpenses;
 
   const columns = [
     { header: 'الوصف', accessor: (e: Expense) => e.description },

@@ -53,8 +53,8 @@ export const ProfitAnalysisSection: React.FC<ProfitAnalysisSectionProps> = ({ or
     const productStats: Record<string, { name: string, revenue: number, cost: number, quantity: number, category: string }> = {};
 
     orders.forEach(order => {
-      // Only delivered or completed orders count for realized profit
-      if (['Delivered', 'Completed', 'Received'].includes(order.status)) {
+      // Only non-cancelled orders count for profit analysis as per new centralized business logic
+      if (order.status !== 'Cancelled' && order.status !== 'Rejected') {
         order.items.forEach(item => {
           const product = products.find(p => p.id === item.productId);
           const unitCost = product?.purchasePrice || 0;
